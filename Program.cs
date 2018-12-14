@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Office.Interop.Excel;
-using System.IO;
 
 
 namespace vlookup
@@ -15,11 +14,37 @@ namespace vlookup
         {
 
 
+            //sorting(@"C:\temp\test.xlsx","Sayfa1","B1","B100000");
+            //autofilter(@"C:\temp\test.xlsx","Sayfa1","A1:D1",1,55,5);
+
+        }
+        public static void sorting(string excel, string sheetname,string sortrange1, string sortrange2)
+        {
+            //excel = @"C:\temp\test.xlsx";
+            var exApp = new Microsoft.Office.Interop.Excel.Application();
+            exApp.Visible = true;
 
 
+            var exWbk = exApp.Workbooks.Open(excel);
+
+            var exWks = (Microsoft.Office.Interop.Excel.Worksheet)exWbk.Sheets[sheetname];
 
 
+            exWks.Sort.SetRange(exWks.Range["A1", "G100000"]);
+            exWks.Sort.Header = XlYesNoGuess.xlYes;
+            exWks.Sort.SortFields.Add(exWks.Range[sortrange1, sortrange2], XlSortOn.xlSortOnValues, XlSortOrder.xlDescending);
 
+
+            exWks.Sort.Apply();
+
+
+            exWbk.Save();
+          
+
+            exApp.Workbooks.Close();
+            
+            exApp.Quit();
+         
         }
         public static void vlookup(string contractDetailReport, string envanterlist, string sourceexcelsheet, string destexcelsheet)
         {
@@ -64,15 +89,6 @@ namespace vlookup
             oSheet2.get_Range("C4", "C145").Value2 = returnValueafterInsert;
 
 
-            //İşlem bittikten sonra txt dosyası oluştur.
-            //using (StreamWriter sw = new StreamWriter(txtname))
-            //{
-
-            //     sw.WriteLine("Bitti");
-
-            //}
-
-
             Range myrange3 = exWbk.Sheets[sourceexcelsheet].Range("o2:y300000");
             var returnvalue3 = exApp.WorksheetFunction.VLookup(returninsert, myrange3, 11, false);
 
@@ -103,7 +119,7 @@ namespace vlookup
 
 
         }
-        public static void autofilter(string excelpath, string sheetname, string range)
+        public static void autofilter(string excelpath, string sheetname, string range, int positionofcolumn, object value1, object value2 = null)
         {
 
             var exApp = new Microsoft.Office.Interop.Excel.Application();
@@ -116,7 +132,14 @@ namespace vlookup
             //Worksheet oSheet5 = (Microsoft.Office.Interop.Excel.Worksheet)exWbk.ActiveSheet;
             exWbk.Sheets[sheetname].AutoFilterMode = false;
 
-            exWbk.Sheets[sheetname].Range(range).AutoFilter();
+            exWbk.Sheets[sheetname].Range(range).AutoFilter(positionofcolumn, value1, XlAutoFilterOperator.xlOr, value2, true);
+
+            exWbk.Save();
+
+
+            exApp.Workbooks.Close();
+
+            exApp.Quit();
 
         }
     }
